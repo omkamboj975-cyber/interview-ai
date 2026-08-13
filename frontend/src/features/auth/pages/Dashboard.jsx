@@ -66,7 +66,7 @@ const Dashboard = () => {
           </div>
           <Link
             to="/upload"
-            className="px-5 py-3 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 text-white font-semibold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            className="px-5 py-3 rounded-xl bg-gradient-to-red from-pink-600 to-rose-600 text-white font-semibold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
           >
             + New Analysis
           </Link>
