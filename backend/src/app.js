@@ -1,11 +1,11 @@
+import 'dotenv/config';
 import express from 'express'
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import connectDb from './config/db.js';
 import authRouter from './routes/auth.routes.js';
+import interviewRouter from './routes/interview.route.js';
 import cors from 'cors';
 
-dotenv.config();
 connectDb();
 
 const app = express();
@@ -15,7 +15,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-app.use('/api/auth', authRouter); //getting all the authentication specific routes 
+app.use('/api/auth', authRouter);
+app.use('/api/interview', interviewRouter);
 
 const PORT = process.env.PORT || 5000;
 
