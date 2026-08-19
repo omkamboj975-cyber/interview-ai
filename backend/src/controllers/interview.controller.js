@@ -69,3 +69,34 @@ export const generateInterviewReportController = async (req, res) => {
         });
     }
 };
+
+export const getInterviewReportByIdController = async (req, res) => {
+    const { id } = req.params;
+
+    const report = await InterviewReport.findOne({
+        _id: id,
+        user: req.user.id,
+    });
+
+    if (!report) {
+        return res.status(404).json({
+            message: "Report not found",
+        });
+    }
+
+    res.status(200).json({
+        message: "Report fetched successfully",
+        report,
+    });
+};
+
+export const getAllInterviewReportsController = async (req, res) => {
+    const reports = await InterviewReport.find({ user: req.user.id })
+        .select("jobDescription matchScore createdAt")
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({
+        message: "Reports fetched successfully",
+        reports,
+    });
+};

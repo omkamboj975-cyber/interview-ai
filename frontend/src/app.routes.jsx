@@ -4,6 +4,7 @@ import Register from "./features/auth/pages/Register.jsx";
 import Home from "./features/interview/pages/Home.jsx";
 import Report from "./features/interview/pages/Report.jsx";
 import ProtectedRoute from "./features/auth/components/ProtectedRoute.jsx";
+import History from "./features/interview/pages/History.jsx";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
@@ -21,6 +22,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Report />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/history",
+    element: (
+      <ProtectedRoute>
+        <History />
       </ProtectedRoute>
     ),
   },

@@ -16,3 +16,19 @@ export const generateInterviewReport = async ({ resume, jobDescription, selfDesc
 
     return response.data;
 };
+
+export const getReportHistory = async () => {
+    const response = await axios.get(`${BASE_URL}/history`, {
+        withCredentials: true,
+    });
+
+    return response.data;
+};
+
+export const getReportById = async (id) => {
+    const response = await axios.get(`${BASE_URL}/${id}`, {
+        withCredentials: true,
+    });
+
+    return response.data;
+};

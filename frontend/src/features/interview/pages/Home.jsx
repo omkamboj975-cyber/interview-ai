@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../auth/hooks/useAuth.js";
 import { generateInterviewReport } from "../services/interview.api.js";
 
@@ -82,6 +82,12 @@ const Home = () => {
           <span className="text-sm text-neutral-400">
             {user?.name ? `Hi, ${user.name}` : "Welcome"}
           </span>
+          <Link
+            to="/history"
+            className="text-sm text-neutral-400 hover:text-pink-400 transition-colors"
+          >
+            History
+          </Link>
           <button
             onClick={logout}
             className="text-sm px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:border-pink-500 hover:text-pink-400 transition-colors"
@@ -117,7 +123,7 @@ const Home = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-neutral-200">
-                     Target Job Description
+                    Target Job Description
                   </span>
                   <span className="text-[10px] font-semibold tracking-wide text-pink-400 bg-pink-500/10 border border-pink-500/30 px-2 py-0.5 rounded-full">
                     REQUIRED
