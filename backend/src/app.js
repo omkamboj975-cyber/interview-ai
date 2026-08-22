@@ -5,6 +5,7 @@ import connectDb from './config/db.js';
 import authRouter from './routes/auth.routes.js';
 import interviewRouter from './routes/interview.route.js';
 import cors from 'cors';
+import { notFoundHandler, errorHandler } from './middlewares/errorHandler.middleware.js';
 
 connectDb();
 
@@ -17,6 +18,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/interview', interviewRouter);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 

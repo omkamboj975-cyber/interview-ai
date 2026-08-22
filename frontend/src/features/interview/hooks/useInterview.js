@@ -1,10 +1,19 @@
 import { useContext } from "react";
 import { InterviewContext } from "../interview.context.jsx";
-import { generateInterviewReport, getReportHistory, getReportById } from "../services/interview.api.js";
+import {
+    generateInterviewReport,
+    getReportHistory,
+    getReportById,
+    generateResume,
+} from "../services/interview.api.js";
 
 export const useInterview = () => {
-    const { reports, setReports, currentReport, setCurrentReport, loading, setLoading } =
-        useContext(InterviewContext);
+    const {
+        reports, setReports,
+        currentReport, setCurrentReport,
+        loading, setLoading,
+        resumeLoading, setResumeLoading,
+    } = useContext(InterviewContext);
 
     const generateReport = async ({ resume, jobDescription, selfDescription }) => {
         setLoading(true);
@@ -39,12 +48,32 @@ export const useInterview = () => {
         }
     };
 
+    const downloadResume = async ({ resume, jobDescription, selfDescription }) => {
+        setResumeLoading(true);
+        try {
+            const pdfBlob = await generateResume({ resume, jobDescription, selfDescription });
+
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "tailored-resume.pdf";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } finally {
+            setResumeLoading(false);
+        }
+    };
+
     return {
         reports,
         currentReport,
         loading,
+        resumeLoading,
         generateReport,
         fetchHistory,
         fetchReportById,
+        downloadResume,
     };
 };

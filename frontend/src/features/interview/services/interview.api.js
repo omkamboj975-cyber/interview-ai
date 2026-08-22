@@ -32,3 +32,19 @@ export const getReportById = async (id) => {
 
     return response.data;
 };
+
+export const generateResume = async ({ resume, jobDescription, selfDescription }) => {
+    const formData = new FormData();
+    formData.append("resume", resume);
+    formData.append("jobDescription", jobDescription);
+    if (selfDescription) {
+        formData.append("selfDescription", selfDescription);
+    }
+
+    const response = await axios.post(`${BASE_URL}/generate-resume`, formData, {
+        withCredentials: true,
+        responseType: "blob",
+    });
+
+    return response.data;
+};

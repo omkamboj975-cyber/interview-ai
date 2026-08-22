@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "../../auth/hooks/useAuth.js";
-import { generateInterviewReport } from "../services/interview.api.js";
+import { useInterview } from "../hooks/useInterview.js";
 
 const MAX_JD_CHARS = 5000;
 
 const Home = () => {
   const { user, logout } = useAuth();
+  const { loading, resumeLoading, generateReport, downloadResume } =
+    useInterview();
   const navigate = useNavigate();
 
   const [resume, setResume] = useState(null);
   const [jobDescription, setJobDescription] = useState("");
   const [selfDescription, setSelfDescription] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFile = (file) => {
@@ -22,7 +23,7 @@ const Home = () => {
       setError("Only PDF files are allowed");
       return;
     }
-    if (file.size > 3 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       setError("File must be under 5MB");
       return;
     }
@@ -38,22 +39,25 @@ const Home = () => {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
+  const validateInputs = () => {
     if (!jobDescription.trim()) {
       setError("Please paste the job description");
-      return;
+      return false;
     }
     if (!resume && !selfDescription.trim()) {
       setError("Either a resume or a self description is required");
-      return;
+      return false;
     }
+    return true;
+  };
 
-    setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!validateInputs()) return;
+
     try {
-      const data = await generateInterviewReport({
+      const data = await generateReport({
         resume,
         jobDescription,
         selfDescription,
@@ -66,28 +70,36 @@ const Home = () => {
         err.response?.data?.message ||
           "Something went wrong. Please try again.",
       );
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleDownloadResume = async () => {
+    setError("");
+    if (!validateInputs()) return;
+
+    try {
+      await downloadResume({ resume, jobDescription, selfDescription });
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to generate resume PDF");
     }
   };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Top nav */}
       <header className="border-b border-neutral-800 px-6 py-4 flex items-center justify-between">
         <h1 className="text-lg font-semibold tracking-tight">
           Interview<span className="text-pink-500">Sync</span>
         </h1>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-neutral-400">
-            {user?.name ? `Hi, ${user.name}` : "Welcome"}
-          </span>
-          <Link
-            to="/history"
+          <a
+            href="/history"
             className="text-sm text-neutral-400 hover:text-pink-400 transition-colors"
           >
             History
-          </Link>
+          </a>
+          <span className="text-sm text-neutral-400">
+            {user?.name ? `Hi, ${user.name}` : "Welcome"}
+          </span>
           <button
             onClick={logout}
             className="text-sm px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:border-pink-500 hover:text-pink-400 transition-colors"
@@ -98,7 +110,6 @@ const Home = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 py-14">
-        {/* Heading */}
         <div className="text-center mb-10">
           <h2 className="text-3xl sm:text-4xl font-bold">
             Create Your Custom{" "}
@@ -119,11 +130,10 @@ const Home = () => {
         <form onSubmit={handleSubmit}>
           <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral-800">
-              {/* Left: Job description */}
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-medium text-neutral-200">
-                    Target Job Description
+                    🎯 Target Job Description
                   </span>
                   <span className="text-[10px] font-semibold tracking-wide text-pink-400 bg-pink-500/10 border border-pink-500/30 px-2 py-0.5 rounded-full">
                     REQUIRED
@@ -143,11 +153,10 @@ const Home = () => {
                 </p>
               </div>
 
-              {/* Right: Resume / self description */}
               <div className="p-6 flex flex-col">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-sm font-medium text-neutral-200">
-                    Your Profile
+                    👤 Your Profile
                   </span>
                 </div>
 
@@ -208,6 +217,7 @@ const Home = () => {
                 />
 
                 <div className="flex items-start gap-2 bg-sky-500/10 border border-sky-500/20 text-sky-300 text-xs rounded-xl px-3 py-2 mt-4">
+                  <span>ℹ️</span>
                   <span>
                     Either a <strong>Resume</strong> or a{" "}
                     <strong>Self Description</strong> is required to generate a
@@ -217,18 +227,30 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Footer bar */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-neutral-800 bg-neutral-900/60">
+            {/* Footer bar — now with two actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-neutral-800 bg-neutral-900/60">
               <span className="text-xs text-neutral-500">
                 AI-Powered Strategy Generation · Approx 30s
               </span>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-pink-600 from-pink-600 to-rose-600 text-white text-sm font-semibold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Generating..." : "★ Generate My Interview Strategy"}
-              </button>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleDownloadResume}
+                  disabled={resumeLoading}
+                  className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl border border-neutral-700 text-neutral-200 text-sm font-medium hover:border-pink-500 hover:text-pink-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resumeLoading ? "Generating..." : "⬇ Tailored Resume PDF"}
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-pink-600 from-pink-600 to-rose-600 text-white text-sm font-semibold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading
+                    ? "Generating..."
+                    : "★ Generate My Interview Strategy"}
+                </button>
+              </div>
             </div>
           </div>
         </form>

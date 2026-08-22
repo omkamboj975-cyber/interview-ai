@@ -6,6 +6,7 @@ export const InterviewProvider = ({ children }) => {
   const [reports, setReports] = useState([]);
   const [currentReport, setCurrentReport] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [resumeLoading, setResumeLoading] = useState(false);
 
   return (
     <InterviewContext.Provider
@@ -16,6 +17,8 @@ export const InterviewProvider = ({ children }) => {
         setCurrentReport,
         loading,
         setLoading,
+        resumeLoading,
+        setResumeLoading,
       }}
     >
       {children}

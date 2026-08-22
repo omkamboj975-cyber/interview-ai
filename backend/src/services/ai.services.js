@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import z from "zod";
+import puppeteer from 'puppeteer';
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY,
@@ -30,6 +31,8 @@ const preparationPlanSchema = z.object({
 
 const interviewReportSchema = z.object({
     matchScore: z.number().min(0).max(100),
+
+    scoreExplanation: z.string(),
 
     technicalQuestions: z
         .array(technicalQuestionSchema)
@@ -120,10 +123,13 @@ Follow these rules strictly:
 
 17. Return ONLY the JSON object. Do not include markdown, explanations, or any text outside the JSON.
 
+18. Include a "scoreExplanation" field: 2-3 sentences explaining specifically what pulled the matchScore up or down. Reference real skills from the resume that matched well, and real skills from the job description that were missing or weak. Be specific and concrete, not generic or vague.
+
 The response MUST follow this exact structure:
 
 {
     "matchScore": 80,
+    "scoreExplanation": "The candidate demonstrates strong hands-on experience with React, Node.js, and MongoDB, which are core requirements for this role. However, the resume lacks any mention of testing frameworks, CI/CD pipelines, or cloud deployment experience, which are explicitly requested in the job description.",
     "technicalQuestions": [
         {
             "question": "Example technical question",
@@ -201,4 +207,107 @@ const generateInterviewReport = async ({
     return validated;
 };
 
+const resumeHtmlSchema = z.object({
+    html: z.string(),
+});
+
+const buildResumePrompt = ({ resume, jobDescription, selfDescription }) => {
+    return `
+You are an expert resume writer and HTML/CSS designer.
+
+Using the candidate's existing resume, their self-description, and the target job description below, generate a single, complete, polished, ATS-friendly resume as a self-contained HTML document.
+
+JOB DESCRIPTION:
+${jobDescription}
+
+EXISTING RESUME CONTENT:
+${resume}
+
+CANDIDATE SELF-DESCRIPTION:
+${selfDescription || "Not provided."}
+
+Follow these rules strictly:
+
+1. Tailor the resume content to align with the job description — emphasize relevant skills and experience already present in the candidate's resume. Do not invent experience, companies, job titles, or metrics that are not present in the original resume or self-description.
+
+2. Output a SINGLE, COMPLETE, self-contained HTML document, including:
+   - <!DOCTYPE html>, <html>, <head>, and <body> tags
+   - All CSS inline inside a <style> tag in the <head> — do not link external stylesheets, since this will be rendered offline
+   - Do not use external images, fonts from external URLs, or JavaScript
+
+3. Design it to look clean, professional, and print-ready:
+   - Use a simple, readable font stack (e.g. Arial, Helvetica, sans-serif)
+   - Use clear section headings (Summary, Skills, Experience, Education, Projects — only include sections that have real content)
+   - Use consistent spacing and a layout that fits well on a standard A4/Letter page
+   - Avoid large decorative elements, background images, or anything that wastes print space
+
+4. Do not include any markdown, explanations, or commentary — return ONLY a JSON object with a single field "html" containing the full HTML document as a string.
+
+Return your response in exactly this shape:
+{
+    "html": "<!DOCTYPE html><html>...</html>"
+}
+`.trim();
+};
+
+const generateResumeHtml = async ({ resume, jobDescription, selfDescription }) => {
+    if (!jobDescription || !resume) {
+        throw new Error("Both resume and jobDescription are required to generate a resume");
+    }
+
+    const prompt = buildResumePrompt({ resume, jobDescription, selfDescription });
+    const resumeResponseSchema = z.toJSONSchema(resumeHtmlSchema);
+
+    const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            responseSchema: resumeResponseSchema,
+        },
+    });
+
+    const rawText = response.text;
+
+    let parsed;
+    try {
+        parsed = JSON.parse(rawText);
+    } catch (error) {
+        throw new Error("Gemini returned invalid JSON, could not parse resume HTML");
+    }
+
+    const validated = resumeHtmlSchema.parse(parsed);
+    return validated.html;
+};
+
+const generateResumePdf = async ({ resume, jobDescription, selfDescription }) => {
+    const html = await generateResumeHtml({ resume, jobDescription, selfDescription });
+
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
+    try {
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: "networkidle0" });
+
+        const pdfBuffer = await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: {
+                top: "20px",
+                bottom: "20px",
+                left: "20px",
+                right: "20px",
+            },
+        });
+
+        return pdfBuffer;
+    } finally {
+        await browser.close();
+    }
+};
+
 export default generateInterviewReport;
+export { generateResumePdf };

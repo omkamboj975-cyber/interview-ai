@@ -2,8 +2,9 @@ import User from "../models/user.model.js";
 import blackListToken from "../models/blacklist.model.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import asyncHandler from "../utils/asyncHandler.js";
 
-export const registerUserController = async (req, res) => {
+export const registerUserController = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
         return res.status(400).json({
@@ -39,9 +40,9 @@ export const registerUserController = async (req, res) => {
             email: newUser.email,
         }
     });
-};
+});
 
-export const loginUserController = async (req, res) => {
+export const loginUserController = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select("+password");
@@ -71,9 +72,9 @@ export const loginUserController = async (req, res) => {
             email: user.email,
         }
     });
-};
+});
 
-export const logoutUserController = async (req, res) => {
+export const logoutUserController = asyncHandler(async (req, res) => {
     const token = req.cookies.token;
     if (token) {
         await blackListToken.create({ token });
@@ -82,9 +83,9 @@ export const logoutUserController = async (req, res) => {
     res.status(200).json({
         message: "User logout successfully",
     });
-};
+});
 
-export const getMeController = async (req, res) => {
+export const getMeController = asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id);
     res.status(200).json({
         message: "User details fetched successfully",
@@ -94,4 +95,4 @@ export const getMeController = async (req, res) => {
             email: user.email,
         }
     });
-};
+});
