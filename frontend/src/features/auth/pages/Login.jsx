@@ -17,7 +17,7 @@ const Login = () => {
     setError("");
     try {
       await login(formData);
-      navigate("/");
+      navigate("/app");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }

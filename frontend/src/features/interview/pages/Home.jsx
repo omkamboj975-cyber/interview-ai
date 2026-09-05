@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import { useAuth } from "../../auth/hooks/useAuth.js";
 import { useInterview } from "../hooks/useInterview.js";
 
@@ -91,12 +91,12 @@ const Home = () => {
           Interview<span className="text-pink-500">Sync</span>
         </h1>
         <div className="flex items-center gap-4">
-          <a
-            href="/history"
+          <Link
+            to="/history"
             className="text-sm text-neutral-400 hover:text-pink-400 transition-colors"
           >
             History
-          </a>
+          </Link>
           <span className="text-sm text-neutral-400">
             {user?.name ? `Hi, ${user.name}` : "Welcome"}
           </span>

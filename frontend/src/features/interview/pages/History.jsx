@@ -1,130 +1,162 @@
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router";
-import { useAuth } from "../../auth/hooks/useAuth.js";
-import { useInterview } from "../hooks/useInterview.js";
+import { Link } from "react-router";
+import Button from "../../../components/ui/Button.jsx";
 
-const scoreColor = (score) => {
-  if (score >= 75)
-    return "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
-  if (score >= 50) return "text-amber-400 bg-amber-500/10 border-amber-500/30";
-  return "text-red-400 bg-red-500/10 border-red-500/30";
-};
+const LogoMark = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <g transform="rotate(-30 12 12)">
+      <circle cx="7.3" cy="3.2" r="1.45" />
+      <rect x="5.5" y="4.7" width="3.6" height="14.6" rx="1.8" />
+      <rect x="14.9" y="4.7" width="3.6" height="14.6" rx="1.8" />
+      <circle cx="16.7" cy="20.8" r="1.45" />
+    </g>
+  </svg>
+);
 
-const formatDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-};
+const NavPill = ({ to, children }) => (
+  <Link
+    to={to}
+    className="relative overflow-hidden h-10 px-4 flex items-center rounded-md border border-white/30 text-[14px] text-[#f3f3f3] bg-gradient-to-r from-[#050505] via-[#2a2a2a] to-[#4a4a4a] hover:border-white/70 hover:shadow-[0_0_18px_rgba(200,210,230,0.18)] transition-all duration-300 group"
+  >
+    <span className="relative z-10">{children}</span>
+    <span className="absolute inset-0 -translate-x-[120%] group-hover:translate-x-[120%] transition-transform duration-500 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+  </Link>
+);
 
-const truncate = (text, max = 90) => {
-  if (!text) return "";
-  return text.length > max ? text.slice(0, max).trim() + "..." : text;
-};
-
-const History = () => {
-  const { user, logout } = useAuth();
-  const { reports, loading, fetchHistory } = useInterview();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchHistory().catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+const Landing = () => {
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      {/* Top nav */}
-      <header className="border-b border-neutral-800 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight">
-          Interview<span className="text-pink-500">Sync</span>
-        </h1>
-        <div className="flex items-center gap-4">
-          <Link
-            to="/"
-            className="text-sm text-neutral-400 hover:text-pink-400 transition-colors"
+    <div className="h-screen bg-black text-white overflow-hidden flex flex-col">
+      {/* Header */}
+      <header className="shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-6 sm:px-10 py-5">
+        <Link
+          to="/"
+          aria-label="InterviewSync"
+          className="justify-self-start inline-flex items-center gap-2 text-[15.5px] font-semibold tracking-tight"
+        >
+          <LogoMark />
+          Interview<span className="font-normal">Sync</span>
+        </Link>
+
+        <nav className="justify-self-center hidden md:flex items-center gap-2">
+          <NavPill to="/login">Sign In</NavPill>
+        </nav>
+
+        <div className="justify-self-end">
+          <Button
+            variant="solid"
+            onClick={() => (window.location.href = "/register")}
           >
-            New Analysis
-          </Link>
-          <span className="text-sm text-neutral-400">
-            {user?.name ? `Hi, ${user.name}` : "Welcome"}
-          </span>
-          <button
-            onClick={logout}
-            className="text-sm px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:border-pink-500 hover:text-pink-400 transition-colors"
-          >
-            Logout
-          </button>
+            Start for Free
+          </Button>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
-          <div>
-            <h2 className="text-2xl font-bold">Your reports</h2>
-            <p className="text-neutral-400 text-sm mt-1">
-              All the interview analyses you've generated so far.
-            </p>
-          </div>
-          <Link
-            to="/"
-            className="px-5 py-2.5 rounded-xl bg-pink-600 from-pink-600 to-rose-600 text-white text-sm font-semibold shadow-lg shadow-pink-600/20 hover:shadow-pink-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-          >
-            + New Analysis
-          </Link>
-        </div>
+      {/* Hero */}
+      <main className="flex-1 min-h-0 flex items-end justify-center px-6 pt-2 pb-16">
+        <div className="relative z-10 flex flex-col items-center text-center max-w-[860px] w-full">
+          <span className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-md text-[12.5px] bg-gradient-to-r from-[#7d7d7d] via-[#2a2a2a] to-[#0a0a0a] text-[#f2f2f2]">
+            ✦ AI-Powered Interview Preparation
+          </span>
 
-        {loading && (
-          <p className="text-neutral-400 text-sm">Loading your reports...</p>
-        )}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.12] tracking-tight">
+            <span className="block overflow-hidden py-1">
+              Turn your{" "}
+              <em className="font-serif italic text-[#9a9a9a] not-italic-none">
+                resume
+              </em>{" "}
+              into an
+            </span>
+            <span className="block overflow-hidden py-1">
+              interview strategy.
+            </span>
+          </h1>
 
-        {!loading && reports.length === 0 && (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-10 text-center">
-            <p className="text-neutral-300 font-medium">No reports yet</p>
-            <p className="text-neutral-500 text-sm mt-1">
-              Generate your first interview strategy to see it here.
-            </p>
-            <Link
-              to="/"
-              className="inline-block mt-4 text-sm text-pink-500 hover:text-pink-400 font-medium transition-colors"
+          <p className="max-w-[470px] mt-4 text-[15.5px] leading-relaxed text-[#9a9a9a]">
+            Upload your resume and a job description — get a match score,
+            tailored interview questions, and a day-by-day prep plan.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-7">
+            <Button
+              variant="solid"
+              onClick={() => (window.location.href = "/register")}
             >
-              Get started →
-            </Link>
+              Start for Free
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => (window.location.href = "/login")}
+            >
+              Sign in to continue
+            </Button>
           </div>
-        )}
-
-        {!loading && reports.length > 0 && (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl divide-y divide-neutral-800 overflow-hidden">
-            {reports.map((report) => (
-              <button
-                key={report._id}
-                onClick={() => navigate(`/report/${report._id}`)}
-                className="w-full text-left flex items-center justify-between gap-4 px-6 py-5 hover:bg-neutral-800/50 transition-colors"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm text-neutral-200 font-medium truncate">
-                    {truncate(report.jobDescription)}
-                  </p>
-                  <p className="text-xs text-neutral-500 mt-1">
-                    {formatDate(report.createdAt)}
-                  </p>
-                </div>
-
-                <span
-                  className={`shrink-0 text-sm font-semibold px-3 py-1 rounded-full border ${scoreColor(
-                    report.matchScore,
-                  )}`}
-                >
-                  {report.matchScore}%
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        </div>
       </main>
+
+      {/* Stats footer */}
+      <footer className="shrink-0 flex flex-wrap items-center justify-center md:justify-between gap-6 px-8 sm:px-18 pb-9 text-[#d8d8d8]">
+        <div className="inline-flex items-center gap-3 text-[13.5px]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect
+              x="3.4"
+              y="2.6"
+              width="7.2"
+              height="18.8"
+              rx="3.6"
+              fill="#e8e8e8"
+              fillOpacity="0.5"
+            />
+            <rect
+              x="13.4"
+              y="2.6"
+              width="7.2"
+              height="18.8"
+              rx="3.6"
+              fill="#e8e8e8"
+              fillOpacity="0.5"
+            />
+            <rect
+              x="9.2"
+              y="10.9"
+              width="5.6"
+              height="2.2"
+              rx="1.1"
+              fill="#4a4a4a"
+            />
+          </svg>
+          500+ resumes analyzed
+        </div>
+        <div className="inline-flex items-center gap-3 text-[13.5px]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect
+              x="2.4"
+              y="2.4"
+              width="19.2"
+              height="19.2"
+              rx="6.2"
+              fill="#ffffff"
+            />
+            <path
+              d="M12 7.1v7.4M8.15 12.35L12 16.2l3.85-3.85"
+              stroke="#111"
+              strokeWidth="1.85"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+          3-day average prep plan
+        </div>
+        <div className="inline-flex items-center gap-3 text-[13.5px]">
+          <svg width="40" height="22" viewBox="0 0 40 22">
+            <circle cx="10.2" cy="11" r="9.2" fill="#2b2b2b" />
+            <circle cx="20.2" cy="11" r="9.2" fill="#ffffff" />
+            <circle cx="30.2" cy="11" r="9.2" fill="#f26b1d" />
+          </svg>
+          Built for job seekers everywhere
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default History;
+export default Landing;
