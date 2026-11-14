@@ -4,6 +4,21 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import asyncHandler from "../utils/asyncHandler.js";
 
+const isProd = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+};
+
+const clearCookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+};
+
 export const registerUserController = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -30,7 +45,7 @@ export const registerUserController = asyncHandler(async (req, res) => {
 
     const token = jwt.sign({ id: newUser._id, name: newUser.name }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
         message: "User registered successfully",
@@ -62,7 +77,7 @@ export const loginUserController = asyncHandler(async (req, res) => {
 
     const token = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    res.cookie("token", token);
+    res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
         message: "Login successful",
@@ -79,7 +94,7 @@ export const logoutUserController = asyncHandler(async (req, res) => {
     if (token) {
         await blackListToken.create({ token });
     }
-    res.clearCookie("token");
+    res.clearCookie("token", clearCookieOptions);
     res.status(200).json({
         message: "User logout successfully",
     });

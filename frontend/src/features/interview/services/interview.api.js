@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8008/api/interview";
+const BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:8008"}/api/interview`;
 
 export const generateInterviewReport = async ({ resume, jobDescription, selfDescription }) => {
     const formData = new FormData();
