@@ -1,16 +1,16 @@
 import { Link } from "react-router";
 
 const EmptyReportsState = () => (
-  <div className="bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-2xl p-10 text-center">
-    <p className="text-neutral-300 font-medium">No reports yet</p>
-    <p className="text-neutral-500 text-sm mt-1">
+  <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-8 text-center backdrop-blur-sm sm:p-12">
+    <p className="text-base font-medium text-neutral-100">No reports yet</p>
+    <p className="mt-2 text-sm text-neutral-400">
       Generate your first interview strategy to see it here.
     </p>
     <Link
       to="/app"
-      className="inline-block mt-4 text-sm text-pink-500 hover:text-pink-400 font-medium transition-colors"
+      className="mt-6 inline-flex h-11 items-center justify-center rounded-lg border border-white bg-gradient-to-b from-white via-neutral-200 to-neutral-300 px-6 text-sm font-medium text-black transition-all hover:via-neutral-100 hover:shadow-[0_0_22px_rgba(255,255,255,0.25)]"
     >
-      Get started →
+      Get started
     </Link>
   </div>
 );

@@ -1,8 +1,9 @@
-const scoreColor = (score) => {
-  if (score >= 75)
-    return "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
-  if (score >= 50) return "text-amber-400 bg-amber-500/10 border-amber-500/30";
-  return "text-red-400 bg-red-500/10 border-red-500/30";
+const clampScore = (score) => Math.max(0, Math.min(100, Number(score) || 0));
+
+const scoreTone = (score) => {
+  if (score >= 75) return "text-white border-white/30 bg-white/10";
+  if (score >= 50) return "text-neutral-200 border-white/20 bg-white/[0.06]";
+  return "text-neutral-400 border-white/10 bg-white/[0.03]";
 };
 
 const formatDate = (dateStr) => {
@@ -13,31 +14,44 @@ const formatDate = (dateStr) => {
   });
 };
 
-const truncate = (text, max = 90) => {
+const truncate = (text, max = 120) => {
   if (!text) return "";
   return text.length > max ? text.slice(0, max).trim() + "..." : text;
 };
 
-const ReportListItem = ({ report, onClick }) => (
-  <button
-    onClick={onClick}
-    className="w-full text-left flex items-center justify-between gap-4 px-6 py-5 hover:bg-white/[0.04] transition-colors"
-  >
-    <div className="min-w-0">
-      <p className="text-sm text-neutral-200 font-medium truncate">
-        {truncate(report.jobDescription)}
-      </p>
-      <p className="text-xs text-neutral-500 mt-1">
-        {formatDate(report.createdAt)}
-      </p>
-    </div>
+const ReportListItem = ({ report, onClick }) => {
+  const score = clampScore(report.matchScore);
 
-    <span
-      className={`shrink-0 text-sm font-semibold px-3 py-1 rounded-full border ${scoreColor(report.matchScore)}`}
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors hover:bg-white/[0.04] sm:gap-8 sm:px-8 sm:py-6"
     >
-      {report.matchScore}%
-    </span>
-  </button>
-);
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-neutral-100 sm:text-base">
+          {truncate(report.jobDescription)}
+        </p>
+        <p className="mt-1 text-xs text-neutral-400 sm:text-[13px]">
+          {formatDate(report.createdAt)}
+        </p>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-4">
+        <div className="hidden h-1.5 w-28 overflow-hidden rounded-full bg-white/10 sm:block">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-neutral-600 to-white"
+            style={{ width: `${score}%` }}
+          />
+        </div>
+        <span
+          className={`min-w-14 rounded-full border px-3 py-1 text-center text-sm font-semibold ${scoreTone(score)}`}
+        >
+          {score}%
+        </span>
+      </div>
+    </button>
+  );
+};
 
 export default ReportListItem;

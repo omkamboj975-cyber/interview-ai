@@ -11,10 +11,10 @@ const ResumeUpload = ({ resume, onFileSelect }) => {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-3 flex items-center justify-between gap-3">
         <span className="text-sm text-neutral-300">Upload Resume</span>
-        <span className="text-[10px] font-semibold tracking-wide text-pink-400 bg-pink-500/10 border border-pink-500/30 px-2 py-0.5 rounded-full">
-          BEST RESULTS
+        <span className="rounded-full border border-white/25 bg-white/[0.07] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-200">
+          Best results
         </span>
       </div>
 
@@ -26,17 +26,16 @@ const ResumeUpload = ({ resume, onFileSelect }) => {
         }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
-        className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed px-4 py-6 cursor-pointer transition-colors ${
+        className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors sm:py-10 ${
           dragActive
-            ? "border-pink-500 bg-pink-500/5"
-            : "border-white/15 hover:border-pink-500/50"
+            ? "border-white/70 bg-white/[0.08]"
+            : "border-white/20 bg-white/[0.02] hover:border-white/50 hover:bg-white/[0.05]"
         }`}
       >
-        <span className="text-pink-500 text-xl">⇧</span>
-        <span className="text-sm text-neutral-300 font-medium">
+        <span className="break-all text-sm font-semibold text-neutral-100 sm:text-[15px]">
           {resume ? resume.name : "Click to upload or drag & drop"}
         </span>
-        <span className="text-xs text-neutral-500">PDF (Max 5MB)</span>
+        <span className="text-xs text-neutral-400">PDF (Max 5MB)</span>
       </label>
       <input
         id="resume-upload"
