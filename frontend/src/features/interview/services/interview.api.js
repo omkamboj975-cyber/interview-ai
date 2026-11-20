@@ -4,7 +4,9 @@ const BASE_URL = `${import.meta.env.VITE_API_URL || "http://localhost:8008"}/api
 
 export const generateInterviewReport = async ({ resume, jobDescription, selfDescription }) => {
     const formData = new FormData();
-    formData.append("resume", resume);
+    if (resume) {
+        formData.append("resume", resume);
+    }
     formData.append("jobDescription", jobDescription);
     if (selfDescription) {
         formData.append("selfDescription", selfDescription);
@@ -35,7 +37,9 @@ export const getReportById = async (id) => {
 
 export const generateResume = async ({ resume, jobDescription, selfDescription }) => {
     const formData = new FormData();
-    formData.append("resume", resume);
+    if (resume) {
+        formData.append("resume", resume);
+    }
     formData.append("jobDescription", jobDescription);
     if (selfDescription) {
         formData.append("selfDescription", selfDescription);

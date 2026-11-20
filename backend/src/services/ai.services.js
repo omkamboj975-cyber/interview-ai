@@ -68,16 +68,16 @@ JOB DESCRIPTION:
 ${jobDescription}
 
 CANDIDATE RESUME:
-${resume}
+${resume || "Not provided."}
 
 CANDIDATE SELF-DESCRIPTION:
 ${selfDescription || "Not provided."}
 
 Follow these rules strictly:
 
-1. Calculate matchScore from 0 to 100 based only on the skills, experience, and requirements actually present in the resume and job description.
+1. Calculate matchScore from 0 to 100 based only on the skills, experience, and requirements actually present in the candidate's profile (resume and/or self-description) and job description.
 
-2. Do not assume that the candidate has a skill if it is not mentioned in the resume.
+2. Do not assume that the candidate has a skill if it is not mentioned in the resume or self-description.
 
 3. Generate 3 to 7 technical interview questions.
 
@@ -169,9 +169,9 @@ const generateInterviewReport = async ({
     selfDescription,
     jobDescription,
 }) => {
-    if (!jobDescription || !resume) {
+    if (!jobDescription || (!resume && !selfDescription)) {
         throw new Error(
-            "Both resume and jobDescription are required to generate a report"
+            "Job description and either a resume or self description are required to generate a report"
         );
     }
 
@@ -221,7 +221,7 @@ JOB DESCRIPTION:
 ${jobDescription}
 
 EXISTING RESUME CONTENT:
-${resume}
+${resume || "Not provided."}
 
 CANDIDATE SELF-DESCRIPTION:
 ${selfDescription || "Not provided."}
@@ -251,8 +251,8 @@ Return your response in exactly this shape:
 };
 
 const generateResumeHtml = async ({ resume, jobDescription, selfDescription }) => {
-    if (!jobDescription || !resume) {
-        throw new Error("Both resume and jobDescription are required to generate a resume");
+    if (!jobDescription || (!resume && !selfDescription)) {
+        throw new Error("Job description and either a resume or self description are required to generate a resume");
     }
 
     const prompt = buildResumePrompt({ resume, jobDescription, selfDescription });

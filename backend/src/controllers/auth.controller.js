@@ -27,6 +27,12 @@ export const registerUserController = asyncHandler(async (req, res) => {
         });
     }
 
+    if (typeof password !== "string" || password.length < 6) {
+        return res.status(400).json({
+            message: "Password must be at least 6 characters",
+        });
+    }
+
     const isUserAlreadyExists = await User.findOne({ $or: [{ name }, { email }] });
 
     if (isUserAlreadyExists) {
@@ -35,13 +41,12 @@ export const registerUserController = asyncHandler(async (req, res) => {
         });
     }
 
-    const hash = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password });
+    await newUser.validate();
 
-    const newUser = await User.create({
-        name,
-        email,
-        password: hash,
-    });
+    const hash = await bcrypt.hash(password, 10);
+    newUser.password = hash;
+    await newUser.save();
 
     const token = jwt.sign({ id: newUser._id, name: newUser.name }, process.env.JWT_SECRET, { expiresIn: "1d" });
 

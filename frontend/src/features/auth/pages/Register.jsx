@@ -5,10 +5,10 @@ import AuthLayout from "../components/AuthLayout.jsx";
 import FormField from "../components/FormField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 
-const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+const Register = () => {
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
-  const { login, loading } = useAuth();
+  const { register, loading } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,23 +19,31 @@ const Login = () => {
     e.preventDefault();
     setError("");
     try {
-      await login(formData);
+      await register(formData);
       navigate("/app");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.message || "Registration failed");
     }
   };
 
   return (
     <AuthLayout
-      title="Login"
-      footerText="Don't have an account?"
-      footerLinkText="Register"
-      footerLinkTo="/register"
+      title="Register"
+      footerText="Already have an account?"
+      footerLinkText="Login"
+      footerLinkTo="/login"
     >
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        <FormField
+          label="Name"
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          placeholder="Enter your name"
+        />
         <FormField
           label="Email"
           type="email"
@@ -50,7 +58,7 @@ const Login = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          placeholder="Enter password"
+          placeholder="Enter password (min 6 characters)"
         />
 
         <Button
@@ -59,11 +67,11 @@ const Login = () => {
           disabled={loading}
           className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Registering..." : "Register"}
         </Button>
       </form>
     </AuthLayout>
   );
 };
 
-export default Login;
+export default Register;

@@ -9,40 +9,46 @@ import asyncHandler from "../utils/asyncHandler.js";
 export const generateInterviewReportController = asyncHandler(async (req, res) => {
     const { jobDescription, selfDescription } = req.body;
 
-    if (!jobDescription) {
+    if (!jobDescription || !jobDescription.trim()) {
         return res.status(400).json({
             message: "Job description is required",
         });
     }
 
-    if (!req.file) {
+    const hasResume = !!req.file;
+    const hasSelfDescription = typeof selfDescription === "string" && selfDescription.trim().length > 0;
+
+    if (!hasResume && !hasSelfDescription) {
         return res.status(400).json({
-            message: "Resume file is required",
+            message: "Either a resume or a self description is required",
         });
     }
 
-    const pdfData = await pdfParse(req.file.buffer);
-    const resumeText = pdfData.text;
+    let resumeText = "";
+    if (hasResume) {
+        const pdfData = await pdfParse(req.file.buffer);
+        resumeText = pdfData.text ? pdfData.text.trim() : "";
 
-    if (!resumeText || resumeText.trim().length === 0) {
-        return res.status(400).json({
-            message: "Could not extract text from the uploaded resume",
-        });
+        if (!resumeText && !hasSelfDescription) {
+            return res.status(400).json({
+                message: "Could not extract text from the uploaded resume",
+            });
+        }
+
+        console.log("Resume text extracted successfully");
     }
-
-    console.log("Resume text extracted successfully");
 
     const report = await generateInterviewReport({
         resume: resumeText,
-        selfDescription,
-        jobDescription,
+        selfDescription: hasSelfDescription ? selfDescription.trim() : "",
+        jobDescription: jobDescription.trim(),
     });
 
     const savedReport = await InterviewReport.create({
         user: req.user.id,
-        jobDescription,
-        resume: resumeText,
-        selfDescription,
+        jobDescription: jobDescription.trim(),
+        resume: resumeText || undefined,
+        selfDescription: hasSelfDescription ? selfDescription.trim() : undefined,
         matchScore: report.matchScore,
         scoreExplanation: report.scoreExplanation,
         technicalQuestions: report.technicalQuestions,
@@ -91,31 +97,37 @@ export const getAllInterviewReportsController = asyncHandler(async (req, res) =>
 export const generateResumePdfController = asyncHandler(async (req, res) => {
     const { jobDescription, selfDescription } = req.body;
 
-    if (!jobDescription) {
+    if (!jobDescription || !jobDescription.trim()) {
         return res.status(400).json({
             message: "Job description is required",
         });
     }
 
-    if (!req.file) {
+    const hasResume = !!req.file;
+    const hasSelfDescription = typeof selfDescription === "string" && selfDescription.trim().length > 0;
+
+    if (!hasResume && !hasSelfDescription) {
         return res.status(400).json({
-            message: "Resume file is required",
+            message: "Either a resume or a self description is required",
         });
     }
 
-    const pdfData = await pdfParse(req.file.buffer);
-    const resumeText = pdfData.text;
+    let resumeText = "";
+    if (hasResume) {
+        const pdfData = await pdfParse(req.file.buffer);
+        resumeText = pdfData.text ? pdfData.text.trim() : "";
 
-    if (!resumeText || resumeText.trim().length === 0) {
-        return res.status(400).json({
-            message: "Could not extract text from the uploaded resume",
-        });
+        if (!resumeText && !hasSelfDescription) {
+            return res.status(400).json({
+                message: "Could not extract text from the uploaded resume",
+            });
+        }
     }
 
     const pdfBuffer = await generateResumePdf({
         resume: resumeText,
-        jobDescription,
-        selfDescription,
+        jobDescription: jobDescription.trim(),
+        selfDescription: hasSelfDescription ? selfDescription.trim() : "",
     });
 
     res.setHeader("Content-Type", "application/pdf");
