@@ -96,8 +96,15 @@ export const loginUserController = asyncHandler(async (req, res) => {
 
 export const logoutUserController = asyncHandler(async (req, res) => {
     const token = req.cookies.token;
-    if (token) {
-        await blackListToken.create({ token });
+    if (token && typeof token === "string" && token.trim()) {
+        try {
+            await blackListToken.create({ token });
+        } catch (error) {
+            // Ignore duplicate token blacklisting to handle repeated logout gracefully
+            if (error.code !== 11000) {
+                throw error;
+            }
+        }
     }
     res.clearCookie("token", clearCookieOptions);
     res.status(200).json({
@@ -106,7 +113,20 @@ export const logoutUserController = asyncHandler(async (req, res) => {
 });
 
 export const getMeController = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id);
+    const userId = req.user?.id;
+    if (!userId) {
+        return res.status(401).json({
+            message: "Invalid token",
+        });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found",
+        });
+    }
+
     res.status(200).json({
         message: "User details fetched successfully",
         user: {
